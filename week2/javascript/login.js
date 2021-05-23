@@ -22,7 +22,7 @@ function login() {
       if (res.data.success) {
         const { expired, token } = res.data; // 解構語法
         document.cookie = `starlightToken=${token}; expires=${new Date(expired)}`;
-        window.location = 'products.html';
+        window.location = 'products.html'; // 跳轉到products.html頁面
       } else {
         alert(res.data.message);
       }

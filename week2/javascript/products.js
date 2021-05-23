@@ -12,7 +12,7 @@ const app = {
           this.data.products = res.data.products;
           this.renderProducts(this.data.products);
         } else {
-          alert('請重新登入');
+          alert('無法取得商品');
         }
       })
       .catch((err) => {
@@ -48,12 +48,15 @@ const app = {
     });
   },
   deleteOneItem(e) {
-    console.log(this);
     const { id } = e.target.dataset;
     axios.delete(`${app.data.url}api/${app.data.path}/admin/product/${id}`)
       .then((res) => {
-        alert(res.data.message);
-        app.getProducts();
+        if (res.data.success) {
+          alert(res.data.message);
+          app.getProducts();
+        } else {
+          alert(res.data.message);
+        }
       })
       .catch((err) => {
         alert(err.message);

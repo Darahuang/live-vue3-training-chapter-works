@@ -68,6 +68,7 @@ const app = {
       axios.defaults.headers.common.Authorization = this.data.cookieToken;
     } else {
       alert('請重新登入');
+      window.location = 'index.html';
     }
     this.getProducts();
   }

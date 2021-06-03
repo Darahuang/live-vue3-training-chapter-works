@@ -8,7 +8,7 @@ const path = 'starlightselection';
 btn.addEventListener('click', login);
 
 function login() {
-  if (username.value === '' || password === '') {
+  if (username.value === '' || password.value === '') {
     alert('請輸入Email或Password');
     return;
   }

@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+      crossorigin="anonymous"
+    />
+    <link
+      href="https://fonts.googleapis.com/css?family=Material+Icons|Material+Icons+Outlined|Material+Icons+Two+Tone|Material+Icons+Round|Material+Icons+Sharp"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./css/all.css" />
+  </head>
+
+  <body>
+    <div id="app">
+      <section class="container">
+        <h2 class="text-center">產品列表</h2>
+
+        <div class="row mt-5 justify-content-center">
+          <div class="col-lg-10">
+            <ul class="d-flex list-unstyled justify-content-evenly">
+              <li>
+                <a href="#" class="text-decoration-none link-success">
+                  <span class="material-icons-outlined">travel_explore</span>
+                  全部
+                </a>
+              </li>
+              <li>
+                <a href="#" class="text-decoration-none link-success">
+                  <span class="material-icons-outlined"> festival </span>
+                  亞洲</a
+                >
+              </li>
+              <li>
+                <a href="#" class="text-decoration-none link-success">
+                  <span class="material-icons-outlined"> gite </span>歐洲
+                </a>
+              </li>
+              <li>
+                <a href="#" class="text-decoration-none link-success">
+                  <span class="material-icons-outlined link-success">
+                    luggage
+                  </span>
+                  美洲</a
+                >
+              </li>
+              <li>
+                <a href="#" class="text-decoration-none link-success">
+                  <span class="material-icons-outlined"> sailing </span>大洋洲
+                </a>
+              </li>
+            </ul>
+            <div class="row">
+              <div
+                class="col-lg-4 mt-5"
+                v-for="item in products"
+                :key="item.id"
+              >
+                <div class="card h-100">
+                  <img :src="item.imageUrl" class="card-img-top" alt="..." />
+                  <div class="card-body">
+                    <h5 class="card-title">{{item.title}}</h5>
+                    <p class="card-text">{{item.content}}</p>
+                  </div>
+                  <div class="d-flex justify-content-between card-footer">
+                    <button
+                      class="btn btn-primary"
+                      @click="openModal(item.id)"
+                      :disabled="loadingStatus.loadingItem === item.id"
+                    >
+                      <div
+                        class="spinner-border text-white spinner-border-sm"
+                        v-if="loadingStatus.loadingItem === item.id"
+                        role="status"
+                      >
+                        <span class="visually-hidden">Loading...</span>
+                      </div>
+                      查看更多
+                    </button>
+                    <button
+                      class="btn btn-primary"
+                      @click.prevent="addToCart(item.id)"
+                      :disabled="loadingStatus.loadingItem === item.id"
+                    >
+                      <div
+                        class="spinner-border text-white spinner-border-sm"
+                        v-if="loadingStatus.loadingItem === item.id"
+                        role="status"
+                      >
+                        <span class="visually-hidden">Loading...</span>
+                      </div>
+                      加入購物車
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="container my-5">
+        <h2 class="text-center">購物清單</h2>
+        <div class="row justify-content-center">
+          <div class="col-lg-10">
+            <div class="row">
+              <div class="col-lg-8">
+                <a
+                  href="#"
+                  class="d-block text-end text-decoration-none my-2"
+                  @click.prevent="deleteAll"
+                  >清空購物清單</a
+                >
+                <div class="table-responsive">
+                  <table class="table table-hover">
+                    <thead>
+                      <tr>
+                        <th class="d-none d-lg-table-cell"></th>
+                        <th width="20%">行程名稱</th>
+                        <th>售價</th>
+                        <th width="25%">數量</th>
+                        <th width="10%" class="text-end">小記</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <template v-if="carts.carts">
+                      <tbody>
+                        <tr
+                          v-for="item in carts.carts"
+                          :key="item.id"
+                          class="align-middle"
+                        >
+                          <td
+                            scope="row"
+                            class="text-center d-none d-lg-table-cell"
+                          >
+                            <img
+                              :src="item.product.imageUrl"
+                              style="width: 120px; height: 120px"
+                              alt=""
+                            />
+                          </td>
+                          <td>{{item.product.title}}</td>
+                          <td>{{dollarSignThousandth(item.product.price)}}</td>
+                          <td>
+                            <div class="input-group">
+                              <button
+                                class="btn btn-outline-secondary"
+                                type="button"
+                                @click="updateCart(item.id, item.qty-1)"
+                              >
+                                -1
+                              </button>
+                              <input
+                                type="number"
+                                min="1"
+                                class="form-control text-center"
+                                placeholder=""
+                                aria-label="Example text with two button addons"
+                                v-model="item.qty"
+                              />
+                              <button
+                                class="btn btn-outline-secondary"
+                                type="button"
+                                @click="updateCart(item.id, item.qty+1)"
+                              >
+                                +1
+                              </button>
+                            </div>
+                          </td>
+                          <td class="text-end">
+                            {{dollarSignThousandth(item.total)}}
+                          </td>
+                          <td>
+                            <button
+                              type="button"
+                              class="btn"
+                              @click="deleteCart(item.id)"
+                            >
+                              <span class="material-icons text-danger">
+                                delete_forever</span
+                              >
+                            </button>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </template>
+                  </table>
+                </div>
+              </div>
+              <div class="col-lg-4">
+                <div class="card">
+                  <div class="card-header">訂單資訊</div>
+                  <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                      <p class="card-text">小記:</p>
+                      <p>{{dollarSignThousandth(carts.total)}}</p>
+                    </div>
+                    <div class="input-group mb-3">
+                      <input
+                        type="text"
+                        class="form-control"
+                        placeholder="請輸入優惠碼"
+                        aria-label="Example text with button addon"
+                        aria-describedby="button-addon1"
+                      />
+                      <button
+                        class="btn btn-outline-secondary"
+                        type="button"
+                        id="button-addon1"
+                      >
+                        套用優惠碼
+                      </button>
+                    </div>
+                    <hr />
+                    <div class="d-flex justify-content-between">
+                      <p class="card-text">總金額:</p>
+                      <p>{{dollarSignThousandth(carts.final_total)}}</p>
+                    </div>
+                  </div>
+                  <div class="card-footer text-muted d-grid gap-2">
+                    <button class="btn btn-primary" @click="checkout">
+                      前往結帳
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <product-modal
+        ref="productModal"
+        :product="product"
+        @emit-cart="addToCart"
+      ></product-modal>
+    </div>
+
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.9.1/axios.min.js"
+      integrity="sha512-Xk3wWei2TGrsh9kDSBKUMIjw/86sLUvhtnv9f7fOuIwhhiUTKz8szkWkzHthrM5Bb3Bu9idSzkxOrkzhcneuiw=="
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"
+      integrity="sha384-SR1sx49pcuLnqZUnnPwx6FCym0wLsk5JZuNx2bPPENzswTNFaQU1RDvt3wT4gWFG"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.min.js"
+      integrity="sha384-j0CNLUeiqtyaRmlzUHCPZ+Gy5fQu0dQ6eZ/xAww941Ai1SxSY+0EQqNXNE6DZiVc"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://unpkg.com/vue@next"></script>
+  </body>
+</html>
+
+<script type="module">
+  import productModal from "./components/productModal.js";
+  const app = Vue.createApp({
+    data() {
+      return {
+        url: "https://vue3-course-api.hexschool.io",
+        path: "starlightselection",
+        products: [],
+        product: {},
+        carts: [],
+        loadingStatus: {
+          loadingItem: "",
+        },
+      };
+    },
+    components: {
+      productModal,
+    },
+    methods: {
+      getProducts(page = 1) {
+        const api = `${this.url}/api/${this.path}/products?page=${page}`;
+        axios
+          .get(api)
+          .then((res) => {
+            if (res.data.success) {
+              this.products = res.data.products;
+            } else {
+              alert(res.data.message);
+            }
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      },
+      openModal(id) {
+        const api = `${this.url}/api/${this.path}/product/${id}`;
+        this.loadingStatus.loadingItem = id;
+        axios
+          .get(api)
+          .then((res) => {
+            if (res.data.success) {
+              this.product = res.data.product;
+              this.loadingStatus.loadingItem = "";
+              this.$refs.productModal.openModal();
+            } else {
+              alert(res.data.message);
+            }
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      },
+      getCarts() {
+        const api = `${this.url}/api/${this.path}/cart`;
+        axios
+          .get(api)
+          .then((res) => {
+            if (res.data.success) {
+              this.carts = res.data.data;
+            } else {
+              alert(res.data.message);
+            }
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      },
+      addToCart(id, qty = 1) {
+        const api = `${this.url}/api/${this.path}/cart`;
+        this.loadingStatus.loadingItem = id;
+        const cart = {
+          product_id: id,
+          qty,
+        };
+        axios
+          .post(api, { data: cart })
+          .then((res) => {
+            if (res.data.success) {
+              alert(res.data.message);
+              this.loadingStatus.loadingItem = "";
+              this.getCarts();
+            } else {
+              alert(res.data.message);
+            }
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      },
+      updateCart(id, qty) {
+        console.log(id, qty);
+        if (qty === 0) {
+          alert("人數至少為1位");
+          return;
+        }
+        const api = `${this.url}/api/${this.path}/cart/${id}`;
+        const cart = {
+          product_id: id,
+          qty,
+        };
+        axios
+          .put(api, { data: cart })
+          .then((res) => {
+            if (res.data.success) {
+              alert(res.data.message);
+              this.getCarts();
+            } else {
+              alert(res.data.message);
+            }
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      },
+      deleteCart(id) {
+        const api = `${this.url}/api/${this.path}/cart/${id}`;
+        axios
+          .delete(api)
+          .then((res) => {
+            if (res.data.success) {
+              alert(res.data.message);
+              this.getCarts();
+            } else {
+              alert(res.data.message);
+            }
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      },
+      deleteAll() {
+        const api = `${this.url}/api/${this.path}/carts`;
+        axios.delete(api).then((res) => {
+          if (res.data.success) {
+            alert(res.data.message);
+            this.getCarts();
+          }
+        });
+      },
+      dollarSignThousandth(dollar) {
+        dollar = dollar + "";
+        let parts = dollar.toString().split(".");
+        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        return `$${parts.join(".")}`;
+      },
+      checkout() {
+        if (this.carts.carts.length === 0) {
+          alert("請選擇行程");
+          return;
+        }
+        window.location = "checkout.html";
+      },
+    },
+    created() {
+      this.getProducts();
+      this.getCarts();
+    },
+  });
+  app.mount("#app");
+</script>

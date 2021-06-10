@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+      crossorigin="anonymous"
+    />
+    <link
+      href="https://fonts.googleapis.com/css?family=Material+Icons|Material+Icons+Outlined|Material+Icons+Two+Tone|Material+Icons+Round|Material+Icons+Sharp"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./css/all.css" />
+  </head>
+
+  <body>
+    <div id="app">
+      <section class="container">
+        <h2 class="text-center">確認訂單</h2>
+        <div class="row justify-content-center">
+          <div class="col-lg-8">
+            <div class="table-responsive my-3">
+              <h3 class="text-center">訂單明細</h3>
+              <table class="table table-hover border mb-5">
+                <thead>
+                  <tr>
+                    <th class="d-none d-lg-table-cell"></th>
+                    <th width="20%">行程名稱</th>
+                    <th>售價</th>
+                    <th width="25%">數量</th>
+                    <th width="10%" class="text-end">小記</th>
+                  </tr>
+                </thead>
+                <template v-if="order">
+                  <tbody>
+                    <tr
+                      class="align-middle"
+                      v-for="item in order.products"
+                      :key="item.id"
+                    >
+                      <td
+                        scope="row"
+                        class="text-center d-none d-lg-table-cell"
+                      >
+                        <img
+                          :src="item.product.imageUrl"
+                          style="width: 120px; height: 120px"
+                          alt=""
+                        />
+                      </td>
+                      <td>{{item.product.title}}</td>
+                      <td>{{dollarSignThousandth(item.product.price)}}</td>
+                      <td>{{item.qty}}</td>
+                      <td class="text-end">
+                        {{dollarSignThousandth(item.final_total)}}
+                      </td>
+                    </tr>
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <td colspan="3"></td>
+                      <td class="text-end">總計</td>
+                      <td class="text-end">
+                        {{dollarSignThousandth(order.total)}}
+                      </td>
+                    </tr>
+                  </tfoot>
+                </template>
+              </table>
+              <h3 class="text-center">聯絡人資料</h3>
+              <table v-if="order" class="border table">
+                <tbody>
+                  <tr>
+                    <th width="120px">聯絡人姓名</th>
+                    <td>{{user.name}}</td>
+                  </tr>
+                  <tr>
+                    <th>聯絡人Email</th>
+                    <td>{{user.email}}</td>
+                  </tr>
+                  <tr>
+                    <th>聯絡人電話</th>
+                    <td>{{user.tel}}</td>
+                  </tr>
+                  <tr>
+                    <th>聯絡人地址</th>
+                    <td>{{user.address}}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="d-grid gap-2">
+              <button
+                class="btn btn-primary"
+                type="button"
+                @click="pay(order.id)"
+              >
+                確認付款
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.9.1/axios.min.js"
+      integrity="sha512-Xk3wWei2TGrsh9kDSBKUMIjw/86sLUvhtnv9f7fOuIwhhiUTKz8szkWkzHthrM5Bb3Bu9idSzkxOrkzhcneuiw=="
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"
+      integrity="sha384-SR1sx49pcuLnqZUnnPwx6FCym0wLsk5JZuNx2bPPENzswTNFaQU1RDvt3wT4gWFG"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.min.js"
+      integrity="sha384-j0CNLUeiqtyaRmlzUHCPZ+Gy5fQu0dQ6eZ/xAww941Ai1SxSY+0EQqNXNE6DZiVc"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://unpkg.com/vue@next"></script>
+  </body>
+</html>
+
+<script>
+  const app = Vue.createApp({
+    data() {
+      return {
+        url: "https://vue3-course-api.hexschool.io",
+        path: "starlightselection",
+
+        order: [],
+        user: {},
+      };
+    },
+    methods: {
+      getOrder() {
+        const api = `${this.url}/api/${this.path}/order/-Mbmvox1948bRchf5cap`;
+        axios.get(api).then((res) => {
+          console.log(res);
+          if (res.data.success) {
+            this.order = res.data.order;
+            this.user = res.data.order.user;
+          }
+        });
+      },
+      dollarSignThousandth(dollar) {
+        dollar = dollar + "";
+        let parts = dollar.toString().split(".");
+        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        return `$${parts.join(".")}`;
+      },
+      pay(id) {
+        const api = `${this.url}/api/${this.path}/pay/${id}`;
+        axios.post(api).then((res) => {
+          if (res.data.success) {
+            alert(res.data.message);
+          }
+        });
+      },
+    },
+
+    created() {
+      this.getOrder();
+    },
+  });
+
+  app.mount("#app");
+</script>

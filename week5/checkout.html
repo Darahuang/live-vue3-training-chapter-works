@@ -177,6 +177,9 @@
 </html>
 
 <script>
+  const url = "https://vue3-course-api.hexschool.io";
+  const path = "starlightselection";
+
   Object.keys(VeeValidateRules).forEach((rule) => {
     if (rule !== "default") {
       VeeValidate.defineRule(rule, VeeValidateRules[rule]);
@@ -192,8 +195,6 @@
   const app = Vue.createApp({
     data() {
       return {
-        url: "https://vue3-course-api.hexschool.io",
-        path: "starlightselection",
         form: {
           user: {
             name: "",
@@ -223,7 +224,7 @@
         return phoneNumber.test(value) ? true : "需輸入手機或家用電話";
       },
       createOrder() {
-        const api = `${this.url}/api/${this.path}/order`;
+        const api = `${url}/api/${path}/order`;
         const order = {
           user: this.form.user,
           payment_method: this.payment_method,
@@ -244,7 +245,7 @@
           });
       },
       getOrders(page = 1) {
-        const api = `${this.url}/api/${this.path}/orders?page=${page}`;
+        const api = `${url}/api/${path}/orders?page=${page}`;
         axios.get(api).then((res) => {
           console.log(res);
         });

@@ -128,19 +128,20 @@
 </html>
 
 <script>
+
+  const url = "https://vue3-course-api.hexschool.io";
+  const path = "starlightselection";
+
   const app = Vue.createApp({
     data() {
       return {
-        url: "https://vue3-course-api.hexschool.io",
-        path: "starlightselection",
-
         order: [],
         user: {},
       };
     },
     methods: {
       getOrder() {
-        const api = `${this.url}/api/${this.path}/order/-Mbmvox1948bRchf5cap`;
+        const api = `${url}/api/${path}/order/-Mbmvox1948bRchf5cap`;
         axios.get(api).then((res) => {
           console.log(res);
           if (res.data.success) {
@@ -156,7 +157,7 @@
         return `$${parts.join(".")}`;
       },
       pay(id) {
-        const api = `${this.url}/api/${this.path}/pay/${id}`;
+        const api = `${url}/api/${path}/pay/${id}`;
         axios.post(api).then((res) => {
           if (res.data.success) {
             alert(res.data.message);

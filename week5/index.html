@@ -262,12 +262,14 @@
 </html>
 
 <script type="module">
+  
+  const url = "https://vue3-course-api.hexschool.io";
+  const path = "starlightselection";
+  
   import productModal from "./components/productModal.js";
   const app = Vue.createApp({
     data() {
       return {
-        url: "https://vue3-course-api.hexschool.io",
-        path: "starlightselection",
         products: [],
         product: {},
         carts: [],
@@ -281,7 +283,7 @@
     },
     methods: {
       getProducts(page = 1) {
-        const api = `${this.url}/api/${this.path}/products?page=${page}`;
+        const api = `${url}/api/${path}/products?page=${page}`;
         axios
           .get(api)
           .then((res) => {
@@ -296,7 +298,7 @@
           });
       },
       openModal(id) {
-        const api = `${this.url}/api/${this.path}/product/${id}`;
+        const api = `${url}/api/${path}/product/${id}`;
         this.loadingStatus.loadingItem = id;
         axios
           .get(api)
@@ -314,7 +316,7 @@
           });
       },
       getCarts() {
-        const api = `${this.url}/api/${this.path}/cart`;
+        const api = `${url}/api/${path}/cart`;
         axios
           .get(api)
           .then((res) => {
@@ -329,7 +331,7 @@
           });
       },
       addToCart(id, qty = 1) {
-        const api = `${this.url}/api/${this.path}/cart`;
+        const api = `${url}/api/${path}/cart`;
         this.loadingStatus.loadingItem = id;
         const cart = {
           product_id: id,
@@ -356,7 +358,7 @@
           alert("人數至少為1位");
           return;
         }
-        const api = `${this.url}/api/${this.path}/cart/${id}`;
+        const api = `${url}/api/${path}/cart/${id}`;
         const cart = {
           product_id: id,
           qty,
@@ -376,7 +378,7 @@
           });
       },
       deleteCart(id) {
-        const api = `${this.url}/api/${this.path}/cart/${id}`;
+        const api = `${url}/api/${path}/cart/${id}`;
         axios
           .delete(api)
           .then((res) => {
@@ -392,7 +394,7 @@
           });
       },
       deleteAll() {
-        const api = `${this.url}/api/${this.path}/carts`;
+        const api = `${url}/api/${path}/carts`;
         axios.delete(api).then((res) => {
           if (res.data.success) {
             alert(res.data.message);

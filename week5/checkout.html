@@ -220,7 +220,7 @@
     methods: {
       isPhone(value) {
         const phoneNumber =
-          /^(09)[0-9]{8}$/ && /^\(?(\d{2})\)?[\s\-]?(\d{4})\-?(\d{4})$/;
+        /^(09)[0-9]{8}$/ && /^\(?(\d{2})\)?[\s\-]?(\d{4})\-?(\d{4})$/ && /^[0-9]{8,10}$/
         return phoneNumber.test(value) ? true : "需輸入手機或家用電話";
       },
       createOrder() {

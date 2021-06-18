@@ -20,9 +20,19 @@
 
   <body>
     <div id="app">
+      <loading :active="isLoading">
+        <div class="bubblingG">
+          <span id="bubblingG_1">
+          </span>
+          <span id="bubblingG_2">
+          </span>
+          <span id="bubblingG_3">
+          </span>
+        </div>
+      </loading>
+      
       <section class="container">
         <h2 class="text-center">產品列表</h2>
-
         <div class="row mt-5 justify-content-center">
           <div class="col-lg-10">
             <ul class="d-flex list-unstyled justify-content-evenly">
@@ -115,6 +125,7 @@
                   href="#"
                   class="d-block text-end text-decoration-none my-2"
                   @click.prevent="deleteAll"
+                  v-if="carts.carts.length!==0"
                   >清空購物清單</a
                 >
                 <div class="table-responsive">
@@ -258,6 +269,8 @@
       crossorigin="anonymous"
     ></script>
     <script src="https://unpkg.com/vue@next"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue-loading-overlay@4"></script>
+    <link href="https://cdn.jsdelivr.net/npm/vue-loading-overlay@4/dist/vue-loading.css" rel="stylesheet">
   </body>
 </html>
 
@@ -276,6 +289,7 @@
         loadingStatus: {
           loadingItem: "",
         },
+        isLoading: false,
       };
     },
     components: {
@@ -284,6 +298,7 @@
     methods: {
       getProducts(page = 1) {
         const api = `${url}/api/${path}/products?page=${page}`;
+        this.isLoading = true;
         axios
           .get(api)
           .then((res) => {
@@ -292,10 +307,13 @@
             } else {
               alert(res.data.message);
             }
+            this.isLoading = false;
           })
           .catch((err) => {
             console.log(err);
+            this.isLoading = false;
           });
+          
       },
       openModal(id) {
         const api = `${url}/api/${path}/product/${id}`;
@@ -317,6 +335,7 @@
       },
       getCarts() {
         const api = `${url}/api/${path}/cart`;
+        this.isLoading = true;
         axios
           .get(api)
           .then((res) => {
@@ -325,9 +344,11 @@
             } else {
               alert(res.data.message);
             }
+            this.isLoading = false;
           })
           .catch((err) => {
             console.log(err);
+            this.isLoading = false;
           });
       },
       addToCart(id, qty = 1) {
@@ -343,9 +364,11 @@
             if (res.data.success) {
               alert(res.data.message);
               this.loadingStatus.loadingItem = "";
+              this.$refs.productModal.closeModal();
               this.getCarts();
             } else {
               alert(res.data.message);
+              this.$refs.productModal.closeModal();
             }
           })
           .catch((err) => {
@@ -353,11 +376,11 @@
           });
       },
       updateCart(id, qty) {
-        console.log(id, qty);
         if (qty === 0) {
           alert("人數至少為1位");
           return;
         }
+        this.isLoading = true;
         const api = `${url}/api/${path}/cart/${id}`;
         const cart = {
           product_id: id,
@@ -372,12 +395,15 @@
             } else {
               alert(res.data.message);
             }
+            this.isLoading = false;
           })
           .catch((err) => {
             console.log(err);
+            this.isLoading = false;
           });
       },
       deleteCart(id) {
+        this.isLoading = true;
         const api = `${url}/api/${path}/cart/${id}`;
         axios
           .delete(api)
@@ -388,18 +414,24 @@
             } else {
               alert(res.data.message);
             }
+            this.isLoading = false;
           })
           .catch((err) => {
             console.log(err);
+            this.isLoading = false;
           });
       },
       deleteAll() {
+        this.isLoading = true;
         const api = `${url}/api/${path}/carts`;
         axios.delete(api).then((res) => {
           if (res.data.success) {
             alert(res.data.message);
             this.getCarts();
+          }else{
+            alert(res.data.message);
           }
+          this.isLoading = false;
         });
       },
       dollarSignThousandth(dollar) {
@@ -421,5 +453,8 @@
       this.getCarts();
     },
   });
+  app.use(VueLoading);
+  app.component('loading', VueLoading)
+
   app.mount("#app");
 </script>
